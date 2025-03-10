@@ -1,0 +1,191 @@
+import java.fx.application.Application;
+import java.fx.geomerty.Insets;
+import java.fx.scence.Scene;
+import java.fx.scence.control.*;
+import java.fx.scence.layout.*;
+import java.fx.stage.Stage; 
+
+// Car Class
+class Car { 
+    private String model;
+    private String color;
+    private double basePrice;
+    private double totalPrice;
+    private ListView<Modification> modifications;
+    
+    public Car(String model, double basePrice) { 
+        this.model = model;
+        this.basePrice = basePrice;
+        this.color = "Default";
+        this.totalPrice = basePrice;
+        this.modifications = new ListView<>();
+    } 
+    
+    public void setColor(String color) { 
+        this.color= color;
+        updateTotal();
+    } 
+    
+    public void addModification(Modification mod) { 
+        modifications.getItems().add(mod);
+        updateTotal();
+    } 
+    
+    public void removeModification(Modification mod) {
+        modifications.getItems().remove(mod);
+        updateTotal();
+    }
+    
+    private void updateTotal() { 
+        totalPrice = basePrice;
+        for (Modification mod : modifications.getItems()) { 
+            totalPrice += mod.getPrice();
+        }
+    }
+    
+    public double getTotalPrice() {
+        return totalPrice;
+    } 
+    
+    public String getCarDetails() { 
+        return "Model: " + model + ", Color: " + color;
+    } 
+    
+    public ListView<Modification> getModifications() { 
+        return modifications;
+    }
+} 
+
+// Modification class
+class Modification { 
+    private String name;
+    private String type;
+    private double price;
+    
+    public Modification(String name, String type, double price) {
+        this.name = name;
+        this.type = type;
+        this.price = price;
+    } 
+    
+    public double getPrice() { 
+        return price;
+    }
+    
+    public String getDescription() {
+        return name + " (" + type + "): $" + price;
+    }
+  
+    }
+  }
+  
+// Main Application class
+public class CarModification extends Application { 
+    
+    private ComboBox<String> modelDropdown;
+    private ComboBox<String> colorDropdown;
+    private ListView<String> modificationList;
+    private Label totalPriceLabel;
+    private car currentCar;
+    
+      @Override 
+      public void start(Stage primaryStage) {
+      primaryStage.setTitle("Car Modification Application"); 
+      
+      //Initialize the car with a base price
+      currentCar = new Car("Sedan", 20000); // Default to Sedan and $20000 base price
+      
+      // Model Selection 
+      Label modelLabel = new Label("Select Car Model:"); 
+      modelDropdown = new ComboBox<>();
+      modelDropdown.getItems().addAll("Sedan", "SUV", "Truck");
+      modelDropdown.setOnAction(e -> updateCarModel()); 
+      
+      // Color Selection
+      Label colorLabel = new Label("Select Paint Color:"); 
+      colorDropdown = new ComboBox<>(); 
+      colorDropdown.getItems().addAll("Red", "Blue", "Black", "White");
+      colorDropdown.getSelectionModel().select(0); // Default selection 
+      colorDropdown.setOnAction(e -> updateCarModel());
+      
+      // Modifications List 
+      Label modificationsLabel = new Label("Available Modifications"); 
+      modificationsList = new ListView<>(); 
+      modificationsList.getItems().addAll(
+              "Spoiler - $150", "Custom Wheels - $400", "Window Tint - $200"
+      
+      // Buttons
+      Button addModificationButton = new Button("Add Modification");
+      Button removeModificationButton = new Button("Remove Modification"); 
+      totalPriceLabel = new Label("Total Price: $" + currentCar.getTotalPrice()); 
+      
+      // Event Handling 
+      addModificationButton.setOnAction(e -> addModification()); 
+      removeModificationButton.setOnAction(e -> removeModification());
+      
+      // Layout 
+      VBox layout = new Vbox(10);
+      layout.setPadding(new Insets(20)); 
+      layout.getChildren().addAll( 
+              modelLabel, modelDropdown, 
+              colorLabel, colorDropdown, 
+              modificationsLabel, modificationsList, 
+              addModificationButton, removeModificationButton, 
+              totalPriceLabel); 
+      
+      Scene scene = new Scene(layout, 400, 400); 
+      primaryStage.setScene(scene); 
+      primaryStage.show(); 
+   } 
+   
+   private void addModification() {
+     String selectedModification = modificationsList.getSelectionModel().getSelectedItem();
+     if (selectedModification != null) { 
+         Modification mod = null;
+         if (selectedModification.contains("Spoiler")) mod = new Modification("Spoiler", "Aero", 150);
+         else if (selectedModification.contains("Custom Wheels")) mod = Modification("Custom Wheels", "Wheels", 400);
+         else if (selectedModification.contains("Window Tint")) mod = new Modification("Window Tint", "Windows", 200);
+         
+         if (mod != null) { 
+              currentCar.addModification(mod);
+              updateUI();
+         }
+      }
+   }
+   
+   private void removeModification() { 
+       String selectedModification = modificationsList.getSelectionModel().getSelectedItem();
+       if (selectedModification != null) { 
+           Modification mod = null;
+           if (selectedModification.contains("Spoiler")) mod = new Modification("Spoiler", "Aero", 150);
+           else if (selectedModification.contains("Custom Wheels")) mod = new Modification("Custom Wheels", "Wheels", 400);
+           else if (selectedModification.contains("Window Tint")) mod = new Modification("Window Tint", "Windows", 200);  
+           
+           if (mod != null) { 
+               ccurrentCar.removeModification(mod);
+               updateUI();
+           } 
+       } 
+   } 
+   
+   private void updateCarModel() { 
+       String selectedModel = modelDropdown.getSelectionModel().getSelectedItem();
+       currentCar = new Car(selectedModel, 20000); // Different base price per model 
+       updateUI();
+   } 
+   
+   private void updateCarModel() { 
+       String selectedColor = colorDropdown.getSelectionModel().getSelectedItem();
+       currentCar.setColor(selectedColor);
+       updateUI();
+   } 
+   
+   private void updateUI() { 
+       totalPriceLabel.setText("Total Price: $" + currentCar.getTotalPrice());
+   } 
+   
+   public static void main(String[] args) { 
+       launch(args); 
+   } 
+}
+  
